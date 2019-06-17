@@ -1,0 +1,25 @@
+{
+    "name": "sportify",
+    "version": "0.0.1",
+    "description": "Gym session organizer",
+    "main": "dist/index.js",
+    "scripts": {
+        "build": "tsc",
+        "dev": "nodemon ./lib/server.ts",
+        "start": "node ./dist/server.js",
+        "prod": "npm run build && npm run start"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "body-parser": "^1.18.3",
+        "express": "^4.16.3",
+        "mongoose": "^5.3.0"
+    },
+    "devDependencies": {
+        "@types/express": "^4.16.0",
+        "typescript": "^3.5.2",
+        "nodemon": "^1.18.4",
+        "ts-node": "^8.3.0"
+    }
+}
