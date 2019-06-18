@@ -7,7 +7,7 @@ export default class UserAccountValidator {
         return !!this.accountService.findUserAccountByLoginAsync(login);
     }
 
-    public async isEmailUnique(login: string): Promise<boolean> {
-        return !!this.accountService.findUserAccountByEmailAsync(login);
+    public async isEmailUnique(email: string): Promise<boolean> {
+        return !!this.accountService.findUserAccountByEmailAsync(email);
     }
 }
