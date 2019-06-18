@@ -1,50 +1,33 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
+import * as bcrypt from "bcrypt";
 
 import UserAccount from "../models/userAccountModel";
+import UserAccountValidator from "utils/validators/userAccountValidator";
+import UserAccountService from "services/userAccountService";
 
 export class AuthenticationController {
+    private readonly saltRounds: number = 10;
 
-  public registerUserAccount(req: Request, res: Response) {
+    private userAccountValidator = new UserAccountValidator();
+    private userAccountService = new UserAccountService();
 
-    
-    let newUserAcoount = new UserAccount(req.body)
-  }
+    public async registerUserAccountAsync(req: Request, res: Response): Promise<void> {
+        let newUserAcoount = new UserAccount(req.body);
 
-  public addNewProduct (req: Request, res: Response) {
-    let newProduct = new Product(req.body);
+        const uniqueLogin = await this.userAccountValidator.isLoginUnique(newUserAcoount.login);
+        const uniqueEmail = await this.userAccountValidator.isEmailUnique(newUserAcoount.email);
 
-    newProduct.save((err, product) => {
-      if(err) {
-        res.send(err);
-      }
-      res.json(product);
-    });
-  }
+        if (uniqueLogin && uniqueEmail) {
+            bcrypt.hash(newUserAcoount.password, this.saltRounds, async (err, hash) => {
+                if (err) {
+                    throw err;
+                }
 
-  public getProductById (req: Request, res: Response) {
-    Product.findById(req.params.productId, (err, product) => {
-      if(err) {
-        res.send(err);
-      }
-      res.json(product);
-    });
-  }
+                newUserAcoount.password = hash;
 
-  public updateProduct (req: Request, res: Response) {
-    Product.findOneAndUpdate({ _id: req.params.productId }, req.body, { new: true }, (err, product) => {
-      if(err) {
-        res.send(err);
-      }
-      res.json(product);
-    });
-  }
-
-  public deleteProduct (req: Request, res: Response) {
-    Product.remove({ _id: req.params.productId }, (err, product) => {
-      if(err) {
-        res.send(err);
-      }
-      res.json({ message: 'Successfully deleted' });
-    })
-  }
+                await this.userAccountService.createUserAccountAsync(newUserAcoount);
+                res.status(200);
+            });
+        }
+    }
 }

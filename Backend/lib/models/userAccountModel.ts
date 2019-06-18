@@ -1,14 +1,15 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import * as mongoose from "mongoose";
+import { Schema, Document, Model } from "mongoose";
+import { IWorkoutPlan } from "./workoutPlanModel";
 
 export interface IUserAccount extends Document {
     login: string;
     password: string;
     email: string;
     confirmed: boolean;
-    created_date: Date;
+    createdAt: Date;
+    workoutPlans: IWorkoutPlan[];
 }
-
-const Schema = mongoose.Schema;
 
 const UserAccountSchema: Schema<IUserAccount> = new Schema({
     login: {
@@ -23,10 +24,15 @@ const UserAccountSchema: Schema<IUserAccount> = new Schema({
         type: String,
         required: "Email is required"
     },
-    brand: {
-        type: String,
-        required: "You must specify a brand for new product"
-    }
+    confirmed: {
+        type: Boolean,
+        default: false
+    },
+    createdAt: {
+        type: Date,
+        default: new Date()
+    },
+    workoutPlans: [{ type: Schema.Types.ObjectId, ref: "WorkoutPlan" }]
 });
 
 const UserAccount: Model<IUserAccount> = mongoose.model<IUserAccount>("UserAccount", UserAccountSchema);
