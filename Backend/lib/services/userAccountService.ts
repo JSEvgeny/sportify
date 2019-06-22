@@ -1,4 +1,4 @@
-import UserAccount, { IUserAccount } from "models/userAccountModel";
+import UserAccount, { IUserAccount } from "../models/userAccountModel";
 
 export default class UserAccountService {
     public async createUserAccountAsync(userAccount: IUserAccount): Promise<void> {

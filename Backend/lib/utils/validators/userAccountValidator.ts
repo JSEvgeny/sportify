@@ -1,4 +1,4 @@
-import UserAccountService from "services/userAccountService";
+import UserAccountService from "../../services/userAccountService";
 
 export default class UserAccountValidator {
     private accountService: UserAccountService = new UserAccountService();

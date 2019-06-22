@@ -1,40 +1,73 @@
 import * as mongoose from "mongoose";
+import * as bcrypt from "bcrypt";
 import { Schema, Document, Model } from "mongoose";
 import { IWorkoutPlan } from "./workoutPlanModel";
 
 export interface IUserAccount extends Document {
     login: string;
-    password: string;
     email: string;
+    password: string;
     confirmed: boolean;
     createdAt: Date;
     workoutPlans: IWorkoutPlan[];
+    comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const UserAccountSchema: Schema<IUserAccount> = new Schema({
+const userAccountSchema = new Schema<IUserAccount>({
     login: {
         type: String,
-        required: "Login is required"
-    },
-    password: {
-        type: String,
-        required: "Password is required"
+        required: true,
+        unique: true
     },
     email: {
         type: String,
-        required: "Email is required"
+        required: true,
+        unique: true
+    },
+    password: {
+        type: String,
+        required: true
     },
     confirmed: {
         type: Boolean,
         default: false
     },
-    createdAt: {
-        type: Date,
-        default: new Date()
+    timestamps: {
+        createdAt: {
+            type: Date,
+            default: Date.now()
+        },
+        updatedAt: {
+            type: Date
+        }
     },
     workoutPlans: [{ type: Schema.Types.ObjectId, ref: "WorkoutPlan" }]
 });
 
-const UserAccount: Model<IUserAccount> = mongoose.model<IUserAccount>("UserAccount", UserAccountSchema);
+userAccountSchema.pre("save", next => {
+    bcrypt.hash(this.password, 10, (err, hash) => {
+        this.password = hash;
+        next();
+    });
+});
+
+userAccountSchema.pre("update", next => {
+    bcrypt.hash(this.password, 10, (err, hash) => {
+        this.password = hash;
+        next();
+    });
+});
+
+userAccountSchema.methods.comparePassword = (candidatePassword: string): Promise<boolean> => {
+    let password = this.password;
+    return new Promise((resolve, reject) => {
+        bcrypt.compare(candidatePassword, password, (err, success) => {
+            if (err) return reject(err);
+            return resolve(success);
+        });
+    });
+};
+
+const UserAccount: Model<IUserAccount> = mongoose.model<IUserAccount>("UserAccount", userAccountSchema);
 
 export default UserAccount;
