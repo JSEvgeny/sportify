@@ -13,7 +13,7 @@ export interface IUserAccount extends Document {
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const userAccountSchema = new Schema<IUserAccount>({
+const UserAccountSchema = new Schema<IUserAccount>({
     login: {
         type: String,
         required: true,
@@ -44,21 +44,21 @@ const userAccountSchema = new Schema<IUserAccount>({
     workoutPlans: [{ type: Schema.Types.ObjectId, ref: "WorkoutPlan" }]
 });
 
-userAccountSchema.pre("save", next => {
+UserAccountSchema.pre<IUserAccount>("save", function(next) {
     bcrypt.hash(this.password, 10, (err, hash) => {
         this.password = hash;
         next();
     });
 });
 
-userAccountSchema.pre("update", next => {
+UserAccountSchema.pre<IUserAccount>("update", function(next) {
     bcrypt.hash(this.password, 10, (err, hash) => {
         this.password = hash;
         next();
     });
 });
 
-userAccountSchema.methods.comparePassword = (candidatePassword: string): Promise<boolean> => {
+UserAccountSchema.methods.comparePassword = (candidatePassword: string): Promise<boolean> => {
     let password = this.password;
     return new Promise((resolve, reject) => {
         bcrypt.compare(candidatePassword, password, (err, success) => {
@@ -68,6 +68,6 @@ userAccountSchema.methods.comparePassword = (candidatePassword: string): Promise
     });
 };
 
-const UserAccount: Model<IUserAccount> = mongoose.model<IUserAccount>("UserAccount", userAccountSchema);
+const UserAccount: Model<IUserAccount> = mongoose.model<IUserAccount>("UserAccount", UserAccountSchema);
 
 export default UserAccount;

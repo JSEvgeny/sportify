@@ -28,7 +28,6 @@ class App {
     private initializeMiddlewares() {
         // support application/json type post data
         this.app.use(bodyParser.json());
-        this.app.use(bodyParser.urlencoded());
     }
 
     private initializeErrorHandling() {

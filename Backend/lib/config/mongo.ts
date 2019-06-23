@@ -3,7 +3,7 @@ import * as mongoose from "mongoose";
 export default class Mongo {
     private _mongoAddress: string = process.env.DB_HOST || "127.0.0.1";
     private _mongoPort: string = process.env.DB_PORT || "27017";
-    private _connectionOptions: mongoose.ConnectionOptions = { useNewUrlParser: true };
+    private _connectionOptions: mongoose.ConnectionOptions = { useNewUrlParser: true, useCreateIndex: true };
     private _dbName: string = "";
 
     constructor() {
