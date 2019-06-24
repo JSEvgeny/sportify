@@ -1,6 +1,8 @@
 import * as mongoose from "mongoose";
 
-export default class Mongo {
+require("dotenv").config();
+
+class Mongo {
     private _mongoAddress: string = process.env.DB_HOST || "127.0.0.1";
     private _mongoPort: string = process.env.DB_PORT || "27017";
     private _connectionOptions: mongoose.ConnectionOptions = { useNewUrlParser: true, useCreateIndex: true };
@@ -24,7 +26,7 @@ export default class Mongo {
         }
     }
 
-    public connect = async (): Promise<void> => {
+    public async connect(): Promise<void> {
         try {
             await mongoose.connect(`mongodb://${this._mongoAddress}:${this._mongoPort}/${this._dbName}`, this._connectionOptions);
             console.log("Successfully connected to MongoDb");
@@ -36,5 +38,7 @@ export default class Mongo {
                 throw error;
             }
         }
-    };
+    }
 }
+
+export default Mongo;

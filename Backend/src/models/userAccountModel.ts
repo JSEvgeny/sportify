@@ -45,6 +45,9 @@ const UserAccountSchema = new Schema<IUserAccount>({
 });
 
 UserAccountSchema.pre<IUserAccount>("save", function(next) {
+    // only hash the password if it has been modified (or is new)
+    if (!this.isModified("password")) return next();
+
     bcrypt.hash(this.password, 10, (err, hash) => {
         this.password = hash;
         next();
@@ -52,16 +55,18 @@ UserAccountSchema.pre<IUserAccount>("save", function(next) {
 });
 
 UserAccountSchema.pre<IUserAccount>("update", function(next) {
+    // only hash the password if it has been modified (or is new)
+    if (!this.isModified("password")) return next();
+
     bcrypt.hash(this.password, 10, (err, hash) => {
         this.password = hash;
         next();
     });
 });
 
-UserAccountSchema.methods.comparePassword = (candidatePassword: string): Promise<boolean> => {
-    let password = this.password;
+UserAccountSchema.methods.comparePassword = function(candidatePassword: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
-        bcrypt.compare(candidatePassword, password, (err, success) => {
+        bcrypt.compare(candidatePassword, this.password, (err, success) => {
             if (err) return reject(err);
             return resolve(success);
         });
