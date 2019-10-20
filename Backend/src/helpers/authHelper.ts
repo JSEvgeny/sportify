@@ -1,12 +1,12 @@
 import * as jwt from "jsonwebtoken";
-import { IUserAccount } from "models/userAccountModel";
+import { IUser } from "models/userModel";
 
 export interface IToken {
     token: string;
     expiresIn: number;
 }
 
-interface IDataInToken {
+interface ITokenData {
     _id: string;
 }
 
@@ -14,14 +14,17 @@ class AuthHelper {
     private static _expiresIn: number = 60 * 60; // One hour
     private static _secret: string = process.env.JWT_SECRET;
 
-    public static generateToken = (userAccount: IUserAccount): IToken => {
-        const dataStoredInToken: IDataInToken = {
-            _id: userAccount._id
+    public static generateToken = (user: IUser): IToken => {
+        const dataStoredInToken: ITokenData = {
+            _id: user._id
         };
-        return {
+
+        const token: IToken = {
             token: jwt.sign(dataStoredInToken, AuthHelper._secret, { expiresIn: AuthHelper._expiresIn }),
             expiresIn: AuthHelper._expiresIn
         };
+
+        return token;
     };
 }
 

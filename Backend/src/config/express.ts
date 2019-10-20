@@ -16,7 +16,7 @@ class App {
     private _port = Number(process.env.PORT) || 3000;
     private _path: string = process.env.API_BASE || "/";
 
-    constructor(controllers = [AuthController, IndexController]) {
+    constructor(controllers = [IndexController, AuthController]) {
         this.initializeGlobalMiddlewares();
         this.initializeControllers(controllers);
         this.connectToMongo();
@@ -41,7 +41,10 @@ class App {
 
     private initializeControllers(controllers): void {
         controllers.forEach(controller => {
-            this.app.use(this._path, authMiddleware, controller.router);
+            if (controller === AuthController || controller === IndexController) {
+                return this.app.use(this._path, controller.router);
+            }
+            return this.app.use(this._path, authMiddleware, controller.router);
         });
     }
 

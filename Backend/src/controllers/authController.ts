@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { check, validationResult, ValidationError, Result, ValidationChain } from "express-validator";
-import UserAccount, { IUserAccount } from "../models/userAccountModel";
+import User, { IUser } from "../models/userModel";
 import AuthHelper, { IToken } from "../helpers/authHelper";
 
 class AuthController {
@@ -39,14 +39,18 @@ class AuthController {
     }
 
     public signIn = async (req: Request, res: Response): Promise<void> => {
-        const userAccount = await UserAccount.findOne({ login: req.body.login });
+        const user = await User.findOne({ login: req.body.login });
         const validationErrors: Result<ValidationError> = validationResult(req);
 
         if (validationErrors.isEmpty()) {
-            if (userAccount.comparePassword(userAccount.password)) {
-                const token: IToken = AuthHelper.generateToken(userAccount);
-                //res.setHeader("Set-Cookie", [AuthHelper.createCookie(token)]);
-                res.status(200).json(token);
+            if (user) {
+                if (user.comparePassword(user.password)) {
+                    const token: IToken = AuthHelper.generateToken(user);
+                    //res.setHeader("Set-Cookie", [AuthHelper.createCookie(token)]);
+                    res.status(200).json(token);
+                } else {
+                    res.status(422).json("Wrong login and password combination");
+                }
             } else {
                 res.status(422).json("Wrong login and password combination");
             }
@@ -54,15 +58,15 @@ class AuthController {
     };
 
     public signUp = async (req: Request, res: Response): Promise<void> => {
-        const newUserAccount: IUserAccount = new UserAccount(req.body);
+        const newUser: IUser = new User(req.body);
         const validationErrors: Result<ValidationError> = validationResult(req);
 
         if (validationErrors.isEmpty()) {
-            newUserAccount.save((err, userAccount: IUserAccount) => {
+            newUser.save((err, user: IUser) => {
                 if (err) {
                     res.json(err);
                 }
-                res.json(userAccount);
+                res.json(user);
             });
         } else {
             res.status(422).json(validationErrors.array());

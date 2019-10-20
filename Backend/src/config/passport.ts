@@ -1,6 +1,6 @@
 import * as passport from "passport";
 import { Strategy, ExtractJwt } from "passport-jwt";
-import UserAccount, { IUserAccount } from "../models/userAccountModel";
+import User, { IUser } from "../models/userModel";
 import { Handler } from "express";
 
 require("dotenv").config();
@@ -29,16 +29,16 @@ class Auth {
         };
 
         return new Strategy(params, (req, payload: any, done) => {
-            UserAccount.findOne({ login: payload.login }, (err, userAccount: IUserAccount) => {
+            User.findOne({ login: payload.login }, (err, user: IUser) => {
                 if (err) {
                     return done(err);
                 }
 
-                if (userAccount === null) {
+                if (user === null) {
                     return done(null, false, { message: "The user in the token was not found" });
                 }
 
-                return done(null, { _id: userAccount._id, login: userAccount.login });
+                return done(null, { _id: user._id, login: user.login });
             });
         });
     };

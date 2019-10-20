@@ -3,7 +3,7 @@ import * as bcrypt from "bcrypt";
 import { Schema, Document, Model } from "mongoose";
 import { IWorkoutPlan } from "./workoutPlanModel";
 
-export interface IUserAccount extends Document {
+export interface IUser extends Document {
     login: string;
     email: string;
     password: string;
@@ -13,7 +13,7 @@ export interface IUserAccount extends Document {
     comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
-const UserAccountSchema = new Schema<IUserAccount>({
+const UserSchema = new Schema<IUser>({
     login: {
         type: String,
         required: true,
@@ -44,7 +44,7 @@ const UserAccountSchema = new Schema<IUserAccount>({
     workoutPlans: [{ type: Schema.Types.ObjectId, ref: "WorkoutPlan" }]
 });
 
-UserAccountSchema.pre<IUserAccount>("save", function(next) {
+UserSchema.pre<IUser>("save", function(next) {
     // only hash the password if it has been modified (or is new)
     if (!this.isModified("password")) return next();
 
@@ -54,7 +54,7 @@ UserAccountSchema.pre<IUserAccount>("save", function(next) {
     });
 });
 
-UserAccountSchema.pre<IUserAccount>("update", function(next) {
+UserSchema.pre<IUser>("update", function(next) {
     // only hash the password if it has been modified (or is new)
     if (!this.isModified("password")) return next();
 
@@ -64,7 +64,7 @@ UserAccountSchema.pre<IUserAccount>("update", function(next) {
     });
 });
 
-UserAccountSchema.methods.comparePassword = function(candidatePassword: string): Promise<boolean> {
+UserSchema.methods.comparePassword = function(candidatePassword: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
         bcrypt.compare(candidatePassword, this.password, (err, success) => {
             if (err) return reject(err);
@@ -73,6 +73,6 @@ UserAccountSchema.methods.comparePassword = function(candidatePassword: string):
     });
 };
 
-const UserAccount: Model<IUserAccount> = mongoose.model<IUserAccount>("UserAccount", UserAccountSchema);
+const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
 
-export default UserAccount;
+export default User;

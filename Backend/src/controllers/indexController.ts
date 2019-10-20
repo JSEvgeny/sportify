@@ -1,7 +1,7 @@
 import { Request, Response, Router } from "express";
 
 class IndexController {
-    public topRoute: string = "/";
+    public path: string = "/";
     public router: Router = Router();
 
     constructor() {
@@ -9,7 +9,7 @@ class IndexController {
     }
 
     public intializeRoutes() {
-        this.router.get(`${this.topRoute}`, this.serveReactApp);
+        this.router.get(`${this.path}`, this.serveReactApp);
     }
 
     public serveReactApp = (request: Request, response: Response): void => {
