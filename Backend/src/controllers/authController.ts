@@ -2,10 +2,13 @@ import { Request, Response, Router } from "express";
 import { check, validationResult, ValidationError, Result, ValidationChain } from "express-validator";
 import User, { IUser } from "../models/userModel";
 import AuthHelper, { IToken } from "../helpers/authHelper";
+import UserServerce from "../services/userService";
 
 class AuthController {
     public path: string = "/auth";
     public router: Router = Router();
+
+    private _userService: UserServerce = new UserServerce();
 
     private _signUpValidationMiddleware: ValidationChain[] = [
         check("login", "Login must have more than 5 characters")
@@ -39,12 +42,18 @@ class AuthController {
     }
 
     public signIn = async (req: Request, res: Response): Promise<void> => {
-        const user = await User.findOne({ login: req.body.login });
         const validationErrors: Result<ValidationError> = validationResult(req);
 
         if (validationErrors.isEmpty()) {
+            const login = req.body.login;
+            const password = req.body.password;
+
+            const user = await this._userService.findByLogin(login);
+
             if (user) {
-                if (user.comparePassword(user.password)) {
+                const passwordCorrect: boolean = await this._userService.comparePassword(password, user);
+
+                if (passwordCorrect) {
                     const token: IToken = AuthHelper.generateToken(user);
                     //res.setHeader("Set-Cookie", [AuthHelper.createCookie(token)]);
                     res.status(200).json(token);
@@ -58,16 +67,14 @@ class AuthController {
     };
 
     public signUp = async (req: Request, res: Response): Promise<void> => {
-        const newUser: IUser = new User(req.body);
         const validationErrors: Result<ValidationError> = validationResult(req);
 
         if (validationErrors.isEmpty()) {
-            newUser.save((err, user: IUser) => {
-                if (err) {
-                    res.json(err);
-                }
-                res.json(user);
-            });
+            const newUser: IUser = new User(req.body);
+
+            await this._userService.createUser(newUser);
+
+            res.status(200);
         } else {
             res.status(422).json(validationErrors.array());
         }
